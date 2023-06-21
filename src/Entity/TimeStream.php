@@ -101,7 +101,7 @@ class TimeStream
         $samples[] = [
             $this->getUserId(),
             $duration,
-            $this->getIsStartTime() ? 1 : 0, // Convert boolean to integer
+            $this->getIsStartTime() ? 1 : 2, // Convert boolean to integer
         ];
 
         $dataset = new Unlabeled($samples);

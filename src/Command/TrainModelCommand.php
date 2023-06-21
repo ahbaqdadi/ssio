@@ -40,7 +40,7 @@ class TrainModelCommand extends Command
 
         $samples = [];
         foreach ($timeStreams as $timeStream) {
-            $duration = null;
+            $duration = 1;
             if ($timeStream->getStartTime() && $timeStream->getEndTime()) {
                 // Assuming getStartTime and getEndTime return DateTime objects
                 $interval = $timeStream->getStartTime()->diff($timeStream->getEndTime());
@@ -52,9 +52,11 @@ class TrainModelCommand extends Command
             $samples[] = [
                 $timeStream->getUserId(),
                 $duration,
-                $timeStream->getIsStartTime() ? 1 : 0, // Convert boolean to integer
+                $timeStream->getIsStartTime() ? 1 : 2, // Convert boolean to integer
             ];
         }
+
+        dump($samples);
 
         $dataset = new Unlabeled($samples);
 
