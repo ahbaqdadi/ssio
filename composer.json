@@ -11,6 +11,7 @@
         "ext-iconv": "*",
         "doctrine/doctrine-migrations-bundle": "*",
         "doctrine/orm": "^2.15",
+        "rubix/ml": "^2.4",
         "symfony/console": "6.3.*",
         "symfony/dotenv": "6.3.*",
         "symfony/flex": "^2",
