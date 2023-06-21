@@ -1,0 +1,52 @@
+apiVersion: 1
+
+datasources:
+  - name: Mysql
+    type: mysql
+    access: proxy
+    url: database
+    database: app
+    user: app
+    secureJsonData:
+      password: "!ChangeMe!"
+    jsonData:
+      sslmode: 'disable'
+
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    jsonData:
+      httpMethod: POST
+      manageAlerts: true
+      prometheusType: Prometheus
+      prometheusVersion: 2.37.0
+      cacheLevel: 'High'
+      exemplarTraceIdDestinations:
+        datasourceUid: unique_datasource_uid
+        
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+
+
+dashboardProviders:
+  dashboardproviders.yaml:
+   apiVersion: 1
+   providers:
+   - name: 'default'
+     orgId: 1
+     folder: 'default'
+     type: file
+     disableDeletion: true
+     editable: true
+     options:
+       path: /var/lib/grafana/dashboards/standard
+
+dashboards:
+  default:
+    postgres:
+      gnetId: 9628
+      revision: 1
+      datasource: prometheus

@@ -11,6 +11,7 @@ services:
     restart: unless-stopped
     volumes:
       - php_socket:/var/run/php
+      - php_logs:/srv/app/var/log
     healthcheck:
       interval: 10s
       timeout: 3s
@@ -18,7 +19,7 @@ services:
       start_period: 30s
     environment:
       # Run "composer require symfony/orm-pack" to install and configure Doctrine ORM
-      DATABASE_URL: postgresql://${POSTGRES_USER:-app}:${POSTGRES_PASSWORD:-!ChangeMe!}@database:5432/${POSTGRES_DB:-app}?serverVersion=${POSTGRES_VERSION:-15}&charset=${POSTGRES_CHARSET:-utf8}
+      DATABASE_URL: mysql://${MYSQL_USER:-app}:${MYSQL_PASSWORD:-!ChangeMe!}@database:3306/${MYSQL_DB:-app}?serverVersion=${MYSQL_VERSION:-8.0}
       # Run "composer require symfony/mercure-bundle" to install and configure the Mercure integration
       MERCURE_URL: ${CADDY_MERCURE_URL:-http://caddy/.well-known/mercure}
       MERCURE_PUBLIC_URL: https://${SERVER_NAME:-localhost}/.well-known/mercure
@@ -67,6 +68,56 @@ services:
 # Mercure is installed as a Caddy module, prevent the Flex recipe from installing another service
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning
+      - ./grafana-provisioning/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      - ./grafana-provisioning/dashboards:/var/lib/grafana/dashboards
+    depends_on:
+      - prometheus
+      - database
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
+    depends_on:
+      - database
+    ports:
+      - 9090:9090
+
+  mysql-exporter:
+    image: prom/mysqld-exporter
+    environment:
+      DATA_SOURCE_NAME: "${MYSQL_USER:-app}:${MYSQL_PASSWORD:-!ChangeMe!}@tcp(database:3306)/${MYSQL_DB:-app}"
+    depends_on:
+      - database
+    ports:
+      - 9104:9104
+  loki:
+    image: grafana/loki:2.8.2
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:2.8.2
+    volumes:
+      - /var/log:/var/log
+      - php_logs:/var/log/  # Mount Symfony logs directory
+      - ./promtail/promtail-local-config.yaml:/etc/promtail/promtail-local-config.yaml  # Mount Promtail config file
+    command: -config.file=/etc/promtail/promtail-local-config.yaml
+    depends_on:
+      - loki
 
 volumes:
   php_socket:
@@ -75,3 +126,10 @@ volumes:
   db_data:
 ###> symfony/mercure-bundle ###
 ###< symfony/mercure-bundle ###
+
+###> doctrine/doctrine-bundle ###
+  database_data:
+###< doctrine/doctrine-bundle ###
+  grafana_data:
+  prometheus_data:
+  php_logs:

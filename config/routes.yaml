@@ -3,3 +3,23 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+timestream_toggle:
+    path: /
+    # the controller value has the format 'controller_class::method_name'
+    controller: App\Controller\TimeStreamToggleController::index
+
+timestream_edit:
+    path: /edit/{id}
+    # the controller value has the format 'controller_class::method_name'
+    controller: App\Controller\TimeStreamToggleController::edit
+
+timestream_delete:
+    path: /delete/{id}
+    # the controller value has the format 'controller_class::method_name'
+    controller: App\Controller\TimeStreamToggleController::delete
+
+timestream_export:
+    path: /export
+    # the controller value has the format 'controller_class::method_name'
+    controller: App\Controller\TimeStreamToggleController::exportCsv    
