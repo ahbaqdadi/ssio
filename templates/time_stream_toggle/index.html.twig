@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Time Stream</h1>
+
+    {{ form_start(form) }}
+    {{ form_widget(form.toggle) }}
+    {{ form_end(form) }}
+
+
+    <a href="{{ path('timestream_export') }}">Export as CSV</a>
+
+    <table class="table table-striped mt-3">
+        <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">User Id</th>
+            <th scope="col">Start Time</th>
+            <th scope="col">End Time</th>
+            <th scope="col">Is Start Time</th>
+
+        </tr>
+        </thead>
+        <tbody>
+        {% for timeStream in listTimeStream %}
+            <tr>
+                <th scope="row">{{ timeStream.id }}</th>
+                <td>{{ timeStream.userId }}</td>
+                <td>{{ timeStream.startTime ? timeStream.startTime.format('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ timeStream.endTime ? timeStream.endTime.format('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ timeStream.isStartTime ? 'Start' : 'End' }}</td>
+                <td><a href="{{ path('timestream_edit', {'id': timeStream.id}) }}">Edit</a></td>
+                <td><a href="{{ path('timestream_delete', {'id': timeStream.id}) }}">Delete</a></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
