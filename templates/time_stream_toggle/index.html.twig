@@ -31,6 +31,7 @@
                 <td>{{ timeStream.isStartTime ? 'Start' : 'End' }}</td>
                 <td><a href="{{ path('timestream_edit', {'id': timeStream.id}) }}">Edit</a></td>
                 <td><a href="{{ path('timestream_delete', {'id': timeStream.id}) }}">Delete</a></td>
+                <td>{{ timeStream.aiChecking }}</td>
             </tr>
         {% endfor %}
         </tbody>

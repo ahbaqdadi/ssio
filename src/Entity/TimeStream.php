@@ -5,6 +5,9 @@ namespace App\Entity;
 use App\Repository\TimeStreamRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Rubix\ML\PersistentModel;
+use Rubix\ML\Persisters\Filesystem;
+use Rubix\ML\Datasets\Unlabeled;
 
 #[ORM\Entity(repositoryClass: TimeStreamRepository::class)]
 class TimeStream
@@ -80,5 +83,29 @@ class TimeStream
         $this->isStartTime = $isStartTime;
 
         return $this;
+    }
+
+    public function aiChecking()
+    {
+        $estimator = PersistentModel::load(new Filesystem('../model.rbx'));
+
+        $duration = null;
+        if ($this->getStartTime() && $this->getEndTime()) {
+            // Assuming getStartTime and getEndTime return DateTime objects
+            $interval = $this->getStartTime()->diff($this->getEndTime());
+            $duration = $interval->days * 24 * 60; // Convert to minutes
+            $duration += $interval->h * 60;
+            $duration += $interval->i;
+        }
+
+        $samples[] = [
+            $this->getUserId(),
+            $duration,
+            $this->getIsStartTime() ? 1 : 0, // Convert boolean to integer
+        ];
+
+        $dataset = new Unlabeled($samples);
+
+        return $estimator->predict($dataset)[0] == 1 ? 'this is not normal' : 'it is normal';
     }
 }
